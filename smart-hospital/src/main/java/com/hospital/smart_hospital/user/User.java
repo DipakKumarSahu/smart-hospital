@@ -22,7 +22,8 @@ public class User extends AuditableEntity {
     @Column(name = "full_name", nullable = false, length = 100)
     private String fullName;
 
-    
+
+    @Column(nullable = false)
     private String password;
 
     @Column(unique = true, nullable = false)
@@ -40,6 +41,10 @@ public class User extends AuditableEntity {
         @Enumerated(EnumType.STRING)
         @Column(length = 30)
         private UserStatus status =  UserStatus.PENDING_VERIFICATION;
+
+    @Builder.Default
+    @Column(nullable = false)
+    private boolean emailVerified = false;
 
         @ManyToMany(fetch = FetchType.EAGER)
         @JoinTable(
