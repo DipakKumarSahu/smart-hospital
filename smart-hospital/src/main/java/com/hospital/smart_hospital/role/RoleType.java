@@ -1,6 +1,6 @@
 package com.hospital.smart_hospital.role;
 
-public enum RoleName {
+public enum RoleType {
     ROLE_ADMIN,
 
     ROLE_DOCTOR,

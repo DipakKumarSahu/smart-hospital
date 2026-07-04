@@ -1,4 +1,4 @@
-package com.hospital.smart_hospital.user;
+package com.hospital.smart_hospital.user.enums;
 
 public enum UserStatus {
 
