@@ -1,6 +1,7 @@
 package com.hospital.smart_hospital.user;
 
 import com.hospital.smart_hospital.common.entity.AuditableEntity;
+import com.hospital.smart_hospital.patient.entity.Patient;
 import com.hospital.smart_hospital.role.Role;
 import com.hospital.smart_hospital.staff.entity.Staff;
 import com.hospital.smart_hospital.user.enums.AuthProvider;
@@ -33,6 +34,8 @@ public class User extends AuditableEntity {
     @Column(name = "phone_number", nullable = false, length = 15)
     private String phoneNumber;
 
+    private String profileImageUrl;
+
         @Builder.Default
         @Enumerated(EnumType.STRING)
         private AuthProvider provider =  AuthProvider.LOCAL;
@@ -57,5 +60,10 @@ public class User extends AuditableEntity {
     @OneToOne(mappedBy = "user",
             fetch = FetchType.LAZY)
     private Staff staff;
+
+    @OneToOne(mappedBy = "user",
+            fetch = FetchType.LAZY)
+    private Patient patient;
+
     }
 
