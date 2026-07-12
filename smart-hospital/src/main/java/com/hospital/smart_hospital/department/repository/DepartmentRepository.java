@@ -13,5 +13,7 @@ public interface DepartmentRepository
 
     Optional<Department> findByDepartmentName(String name);
 
-    boolean existsByDepartmentCode(String code);
+    boolean existsByDepartmentCodeIgnoreCase(String departmentCode);
+
+    boolean existsByDepartmentNameIgnoreCase(String departmentName);
 }

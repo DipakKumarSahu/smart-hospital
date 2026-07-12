@@ -28,10 +28,7 @@ public interface DoctorScheduleRepository
             DayOfWeek dayOfWeek
     );
 
-    boolean existsByDoctorScheduleIdAndSlotDate(
-            Long doctorScheduleId,
-            LocalDate slotDate
-    );
+
 
 
 }
