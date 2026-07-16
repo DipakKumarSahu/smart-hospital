@@ -1,6 +1,10 @@
 package com.hospital.smart_hospital.exception;
 
+import com.hospital.smart_hospital.common.dto.ValidationErrorResponse;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 
+import java.util.HashMap;
+import java.util.Map;
 
 import com.hospital.smart_hospital.common.dto.ApiResponse;
 import org.springframework.http.HttpStatus;
@@ -42,5 +46,29 @@ public class GlobalExceptionHandler {
                         .success(false)
                         .message(ex.getMessage())
                         .build());
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ValidationErrorResponse> handleValidationException(
+            MethodArgumentNotValidException ex) {
+
+        Map<String, String> errors = new HashMap<>();
+
+        ex.getBindingResult()
+                .getFieldErrors()
+                .forEach(error ->
+                        errors.put(
+                                error.getField(),
+                                error.getDefaultMessage()
+                        ));
+
+        ValidationErrorResponse response =
+                ValidationErrorResponse.builder()
+                        .success(false)
+                        .message("Validation failed.")
+                        .errors(errors)
+                        .build();
+
+        return ResponseEntity.badRequest().body(response);
     }
 }

@@ -10,15 +10,23 @@ import lombok.Setter;
 @Setter
 public class CreateDepartmentRequest {
 
-    @NotBlank
-    @Size(max = 20)
+    @NotBlank(message = "Department code is required.")
+    @Size(
+            max = 20,
+            message = "Department code must not exceed 20 characters."
+    )
     private String departmentCode;
 
-    @NotBlank
-    @Size(max = 100)
+    @NotBlank(message = "Department name is required.")
+    @Size(
+            max = 100,
+            message = "Department name must not exceed 100 characters."
+    )
     private String departmentName;
 
-    @Size(max = 500)
+    @Size(
+            max = 500,
+            message = "Description must not exceed 500 characters."
+    )
     private String description;
-
 }

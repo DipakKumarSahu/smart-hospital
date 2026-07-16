@@ -2,10 +2,13 @@ package com.hospital.smart_hospital.department.controller;
 
 import com.hospital.smart_hospital.common.dto.ApiResponse;
 import com.hospital.smart_hospital.department.dto.request.CreateDepartmentRequest;
+import com.hospital.smart_hospital.department.dto.request.UpdateDepartmentRequest;
 import com.hospital.smart_hospital.department.dto.response.DepartmentResponse;
 import com.hospital.smart_hospital.department.service.DepartmentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -58,6 +61,68 @@ public class DepartmentController {
 
         return ResponseEntity.ok(
                 ApiResponse.<List<DepartmentResponse>>builder()
+                        .success(true)
+                        .message("Departments fetched successfully.")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<DepartmentResponse>> updateDepartment(
+            @PathVariable Long id,
+            @Valid @RequestBody UpdateDepartmentRequest request) {
+
+        DepartmentResponse response =
+                departmentService.updateDepartment(id, request);
+
+        return ResponseEntity.ok(
+                ApiResponse.<DepartmentResponse>builder()
+                        .success(true)
+                        .message("Department updated successfully.")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteDepartment(
+            @PathVariable Long id) {
+
+        departmentService.deleteDepartment(id);
+
+        return ResponseEntity.noContent().build();
+    }
+
+    @GetMapping("/active")
+    public ResponseEntity<ApiResponse<Page<DepartmentResponse>>> getActiveDepartments(
+            Pageable pageable) {
+
+        Page<DepartmentResponse> response =
+                departmentService.getAllActiveDepartments(pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<DepartmentResponse>>builder()
+                        .success(true)
+                        .message("Departments fetched successfully.")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<ApiResponse<Page<DepartmentResponse>>> searchDepartments(
+            @RequestParam String keyword,
+            Pageable pageable) {
+
+        Page<DepartmentResponse> response =
+                departmentService.searchDepartments(
+                        keyword,
+                        pageable
+                );
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<DepartmentResponse>>builder()
                         .success(true)
                         .message("Departments fetched successfully.")
                         .data(response)

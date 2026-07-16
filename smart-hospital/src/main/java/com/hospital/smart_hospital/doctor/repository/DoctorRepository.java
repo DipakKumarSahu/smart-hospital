@@ -1,23 +1,37 @@
 package com.hospital.smart_hospital.doctor.repository;
 
-
 import com.hospital.smart_hospital.doctor.entity.Doctor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-import java.util.List;
 import java.util.Optional;
 
 public interface DoctorRepository extends JpaRepository<Doctor, Long> {
 
     Optional<Doctor> findByDoctorCode(String doctorCode);
 
-    Optional<Doctor> findByLicenseNumber(String licenseNumber);
+    Optional<Doctor> findByIdAndActiveTrue(Long id);
 
-    Optional<Doctor> findByStaffId(Long staffId);
+    boolean existsByLicenseNumberIgnoreCase(String licenseNumber);
 
-    List<Doctor> findByDepartmentId(Long departmentId);
+    boolean existsByStaffId(Long staffId);
 
-    boolean existsByDoctorCode(String doctorCode);
+    Page<Doctor> findByActiveTrue(Pageable pageable);
 
-    boolean existsByLicenseNumber(String licenseNumber);
+    Page<Doctor> findBySpecializationContainingIgnoreCaseAndActiveTrue(
+            String specialization,
+            Pageable pageable
+    );
+
+//    Page<Doctor> findByActiveTrueAndStaffUserFullNameContainingIgnoreCaseOrActiveTrueAndSpecializationContainingIgnoreCase(
+//            String fullName,
+//            String specialization,
+//            Pageable pageable
+//    );
+
+    Page<Doctor> findByStaffUserFullNameContainingIgnoreCaseAndActiveTrue(
+            String fullName,
+            Pageable pageable
+    );
 }
