@@ -12,7 +12,6 @@ import java.time.LocalDate;
 
 @Getter
 @Setter
-@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -62,7 +61,7 @@ public class Patient extends AuditableEntity {
             length = 15)
     private String emergencyContactNumber;
 
-    @Builder.Default
+//    @Builder.Default
     @Column(nullable = false)
     private boolean active = true;
 
