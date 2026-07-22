@@ -4,6 +4,6 @@ public enum VisitType {
 
         ONLINE,
 
-        WALK_IN
+        OFFLINE
 
 }

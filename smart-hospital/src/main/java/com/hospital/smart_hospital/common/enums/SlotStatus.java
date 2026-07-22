@@ -10,5 +10,7 @@ public enum SlotStatus {
 
     RESERVED,
 
+    CANCELLED,
+
     COMPLETED
 }

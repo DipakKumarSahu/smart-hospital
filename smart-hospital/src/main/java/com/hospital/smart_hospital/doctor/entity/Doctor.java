@@ -4,11 +4,14 @@ package com.hospital.smart_hospital.doctor.entity;
 
 import com.hospital.smart_hospital.common.entity.AuditableEntity;
 import com.hospital.smart_hospital.department.entity.Department;
+import com.hospital.smart_hospital.schedule.enitiy.DoctorSchedule;
 import com.hospital.smart_hospital.staff.entity.Staff;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -64,4 +67,8 @@ public class Doctor extends AuditableEntity {
             foreignKey = @ForeignKey(name = "fk_doctor_department")
     )
     private Department department;
+
+    @OneToMany(mappedBy = "doctor",
+            fetch = FetchType.LAZY)
+    private List<DoctorSchedule> schedules = new ArrayList<>();
 }

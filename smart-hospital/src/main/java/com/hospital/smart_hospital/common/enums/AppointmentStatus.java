@@ -8,6 +8,8 @@ public enum AppointmentStatus {
 
     CHECKED_IN,
 
+    IN_PROGRESS,
+
     IN_CONSULTATION,
 
     COMPLETED,
@@ -16,5 +18,7 @@ public enum AppointmentStatus {
 
     NO_SHOW,
 
-    EXPIRED
+    EXPIRED,
+
+    BOOKED
 }
