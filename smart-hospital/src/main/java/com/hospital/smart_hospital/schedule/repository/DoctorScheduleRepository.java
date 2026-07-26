@@ -1,5 +1,6 @@
 package com.hospital.smart_hospital.schedule.repository;
 
+import com.hospital.smart_hospital.appointment_slot.entity.AppointmentSlot;
 import com.hospital.smart_hospital.schedule.enitiy.DoctorSchedule;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -8,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.DayOfWeek;
+import java.time.LocalDate;
 import java.time.LocalTime;
 import java.util.List;
 import java.util.Optional;
@@ -86,4 +88,6 @@ public interface DoctorScheduleRepository
             @Param("endTime") LocalTime endTime,
             @Param("scheduleId") Long scheduleId
     );
+
+
 }

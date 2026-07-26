@@ -1,10 +1,14 @@
 package com.hospital.smart_hospital.schedule.service.impl;
 
+
+import com.hospital.smart_hospital.appointment_slot.repository.AppointmentSlotRepository;
 import com.hospital.smart_hospital.appointment_slot.service.AppointmentSlotService;
+
 import com.hospital.smart_hospital.doctor.entity.Doctor;
 import com.hospital.smart_hospital.doctor.repository.DoctorRepository;
 import com.hospital.smart_hospital.exception.BadRequestException;
 import com.hospital.smart_hospital.exception.ResourceNotFoundException;
+
 import com.hospital.smart_hospital.schedule.dto.request.CreateDoctorScheduleRequest;
 import com.hospital.smart_hospital.schedule.dto.request.UpdateDoctorScheduleRequest;
 import com.hospital.smart_hospital.schedule.dto.response.DoctorScheduleResponse;
@@ -20,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Duration;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -30,6 +35,7 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     private final DoctorRepository doctorRepository;
     private final DoctorScheduleMapper mapper;
     private final AppointmentSlotService appointmentSlotService;
+    private final AppointmentSlotRepository slotRepository;
 
     @Override
     public DoctorScheduleResponse createSchedule(CreateDoctorScheduleRequest request) {
@@ -233,3 +239,4 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
         }
     }
 }
+

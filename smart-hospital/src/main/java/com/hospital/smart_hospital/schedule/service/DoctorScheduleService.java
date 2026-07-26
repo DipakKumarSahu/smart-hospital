@@ -1,5 +1,6 @@
 package com.hospital.smart_hospital.schedule.service;
 
+import com.hospital.smart_hospital.appointment_slot.dto.request.BlockAppointmentSlotsRequest;
 import com.hospital.smart_hospital.schedule.dto.request.CreateDoctorScheduleRequest;
 import com.hospital.smart_hospital.schedule.dto.request.UpdateDoctorScheduleRequest;
 import com.hospital.smart_hospital.schedule.dto.response.DoctorScheduleResponse;
@@ -34,4 +35,5 @@ public interface DoctorScheduleService {
      * Soft delete a schedule.
      */
     void deleteSchedule(Long id);
+
 }

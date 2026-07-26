@@ -2,6 +2,7 @@ package com.hospital.smart_hospital.appointment_slot.service.impl;
 
 
 
+import com.hospital.smart_hospital.appointment_slot.dto.request.BlockAppointmentSlotsRequest;
 import com.hospital.smart_hospital.appointment_slot.dto.request.UpdateAppointmentSlotRequest;
 import com.hospital.smart_hospital.appointment_slot.dto.response.AppointmentSlotResponse;
 import com.hospital.smart_hospital.appointment_slot.entity.AppointmentSlot;
@@ -9,6 +10,7 @@ import com.hospital.smart_hospital.appointment_slot.mapper.AppointmentSlotMapper
 import com.hospital.smart_hospital.appointment_slot.repository.AppointmentSlotRepository;
 import com.hospital.smart_hospital.appointment_slot.service.AppointmentSlotService;
 import com.hospital.smart_hospital.common.enums.SlotStatus;
+import com.hospital.smart_hospital.exception.BadRequestException;
 import com.hospital.smart_hospital.exception.ResourceNotFoundException;
 
 
@@ -21,13 +23,14 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.time.LocalTime;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class AppointmentSlotServiceImpl implements AppointmentSlotService {
 
-    private static final int DAYS_TO_GENERATE = 30;
+    private static final int DAYS_TO_GENERATE = 10;
 
     private final AppointmentSlotRepository slotRepository;
     private final AppointmentSlotMapper mapper;
@@ -159,5 +162,68 @@ public class AppointmentSlotServiceImpl implements AppointmentSlotService {
 
             start = end;
         }
+    }
+
+
+    @Override
+    public void blockSlots(BlockAppointmentSlotsRequest request) {
+
+        List<AppointmentSlot> slots =
+                slotRepository
+                        .findByDoctorIdAndSlotDateAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualAndActiveTrue(
+                                request.doctorId(),
+                                request.slotDate(),
+                                request.startTime(),
+                                request.endTime()
+                        );
+
+        if (slots.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No appointment slots found."
+            );
+        }
+
+        slots.forEach(slot -> {
+
+            if (slot.getStatus() == SlotStatus.BOOKED) {
+                throw new BadRequestException(
+                        "Booked slots cannot be blocked."
+                );
+            }
+
+            slot.setStatus(SlotStatus.BLOCKED);
+        });
+
+        slotRepository.saveAll(slots);
+    }
+
+
+    @Override
+    public void unblockSlots(BlockAppointmentSlotsRequest request) {
+
+        List<AppointmentSlot> slots =
+                slotRepository
+                        .findByDoctorIdAndSlotDateAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualAndActiveTrue(
+                                request.doctorId(),
+                                request.slotDate(),
+                                request.startTime(),
+                                request.endTime()
+                        );
+
+        if (slots.isEmpty()) {
+            throw new ResourceNotFoundException(
+                    "No appointment slots found."
+            );
+        }
+
+        slots.forEach(slot -> {
+
+            if (slot.getStatus() == SlotStatus.BLOCKED) {
+                slot.setStatus(SlotStatus.AVAILABLE);
+            }
+
+        });
+
+        slotRepository.saveAll(slots);
     }
 }

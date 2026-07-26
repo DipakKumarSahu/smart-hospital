@@ -45,4 +45,12 @@ public interface AppointmentSlotRepository
     );
 
     void deleteByDoctorScheduleId(Long doctorScheduleId);
+
+    List<AppointmentSlot>
+    findByDoctorIdAndSlotDateAndStartTimeGreaterThanEqualAndEndTimeLessThanEqualAndActiveTrue(
+            Long doctorId,
+            LocalDate slotDate,
+            LocalTime startTime,
+            LocalTime endTime
+    );
 }

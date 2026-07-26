@@ -3,6 +3,7 @@ package com.hospital.smart_hospital.appointment_slot.service;
 
 
 
+import com.hospital.smart_hospital.appointment_slot.dto.request.BlockAppointmentSlotsRequest;
 import com.hospital.smart_hospital.appointment_slot.dto.request.UpdateAppointmentSlotRequest;
 import com.hospital.smart_hospital.appointment_slot.dto.response.AppointmentSlotResponse;
 import com.hospital.smart_hospital.schedule.enitiy.DoctorSchedule;
@@ -29,4 +30,8 @@ public interface AppointmentSlotService {
                                        UpdateAppointmentSlotRequest request);
 
     void deleteSlot(Long id);
+
+    void blockSlots(BlockAppointmentSlotsRequest request);
+
+    void unblockSlots(BlockAppointmentSlotsRequest request);
 }

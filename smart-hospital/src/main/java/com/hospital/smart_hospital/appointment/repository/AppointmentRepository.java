@@ -2,6 +2,7 @@ package com.hospital.smart_hospital.appointment.repository;
 
 
 
+
 import com.hospital.smart_hospital.appointment.entity.Appointment;
 import com.hospital.smart_hospital.common.enums.AppointmentStatus;
 import com.hospital.smart_hospital.common.enums.PaymentStatus;
@@ -15,37 +16,66 @@ import java.util.Optional;
 
 public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
 
+    // ==========================
+    // Basic Queries
+    // ==========================
+
     Optional<Appointment> findByIdAndActiveTrue(Long id);
 
     Optional<Appointment> findByAppointmentCodeAndActiveTrue(String appointmentCode);
 
     Page<Appointment> findByActiveTrue(Pageable pageable);
 
+    // ==========================
+    // Search
+    // ==========================
+
     Page<Appointment> findByPatientUserFullNameContainingIgnoreCaseAndActiveTrue(
             String keyword,
             Pageable pageable
     );
 
+    // Keep this only if it is already used.
     Page<Appointment> findByDoctorStaffUserFullNameContainingIgnoreCaseAndActiveTrue(
             String keyword,
             Pageable pageable
     );
+
+    // ==========================
+    // Patient
+    // ==========================
+
+    List<Appointment> findByPatientIdAndActiveTrue(Long patientId);
+
+    // ==========================
+    // Doctor
+    // ==========================
 
     List<Appointment> findByDoctorIdAndAppointmentDateAndActiveTrue(
             Long doctorId,
             LocalDate appointmentDate
     );
 
-    List<Appointment> findByPatientIdAndActiveTrue(Long patientId);
+    // ==========================
+    // Appointment Status
+    // ==========================
 
     List<Appointment> findByAppointmentDateAndStatusAndActiveTrue(
             LocalDate appointmentDate,
             AppointmentStatus status
     );
 
+    // ==========================
+    // Payment
+    // ==========================
+
     List<Appointment> findByPaymentStatusAndActiveTrue(
             PaymentStatus paymentStatus
     );
 
-    boolean existsByAppointmentSlotId(Long appointmentSlotId);
+    // ==========================
+    // Validation
+    // ==========================
+
+    boolean existsByAppointmentSlotIdAndActiveTrue(Long appointmentSlotId);
 }

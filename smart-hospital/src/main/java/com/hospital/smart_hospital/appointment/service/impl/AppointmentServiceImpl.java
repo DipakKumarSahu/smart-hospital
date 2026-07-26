@@ -1,7 +1,6 @@
 package com.hospital.smart_hospital.appointment.service.impl;
 
 
-
 import com.hospital.smart_hospital.appointment.dto.request.CreateAppointmentRequest;
 import com.hospital.smart_hospital.appointment.dto.request.UpdateAppointmentRequest;
 import com.hospital.smart_hospital.appointment.dto.response.AppointmentResponse;

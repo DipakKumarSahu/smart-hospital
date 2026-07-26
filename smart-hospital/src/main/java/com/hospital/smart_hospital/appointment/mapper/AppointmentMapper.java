@@ -37,6 +37,9 @@ public interface AppointmentMapper {
     void updateAppointment(UpdateAppointmentRequest request,
                            @MappingTarget Appointment appointment);
 
+
+    @Mapping(target = "active", ignore = true)
+
     @Mapping(source = "patient.id", target = "patientId")
     @Mapping(source = "patient.user.fullName", target = "patientName")
 
