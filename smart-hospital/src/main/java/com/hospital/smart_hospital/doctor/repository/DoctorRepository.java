@@ -34,4 +34,6 @@ public interface DoctorRepository extends JpaRepository<Doctor, Long> {
             String fullName,
             Pageable pageable
     );
+
+    Optional<Doctor> findByStaffIdAndActiveTrue(Long staffId);
 }

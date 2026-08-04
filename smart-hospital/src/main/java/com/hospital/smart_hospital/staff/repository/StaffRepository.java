@@ -17,4 +17,9 @@ public interface StaffRepository
     boolean existsByEmployeeCode(String employeeCode);
 
     Optional<Staff> findByIdAndActiveTrue(Long id);
+
+    Optional<Staff> findByUserIdAndActiveTrue(Long userId);
+
+
+
 }

@@ -22,4 +22,6 @@ public interface PatientRepository extends JpaRepository<Patient, Long> {
             String fullName,
             Pageable pageable
     );
+
+    Optional<Patient> findByUserIdAndActiveTrue(Long userId);
 }

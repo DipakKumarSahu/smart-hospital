@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -22,6 +23,7 @@ public class DepartmentController {
 
     private final DepartmentService departmentService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ResponseEntity<ApiResponse<DepartmentResponse>> createDepartment(
             @Valid @RequestBody CreateDepartmentRequest request) {
@@ -37,6 +39,7 @@ public class DepartmentController {
                         .build());
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','LAB_TECHNICIAN')")
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<DepartmentResponse>> getDepartmentById(
             @PathVariable Long id) {
@@ -53,6 +56,8 @@ public class DepartmentController {
         );
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','LAB_TECHNICIAN')")
     @GetMapping
     public ResponseEntity<ApiResponse<List<DepartmentResponse>>> getAllDepartments() {
 
@@ -68,6 +73,7 @@ public class DepartmentController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<DepartmentResponse>> updateDepartment(
             @PathVariable Long id,
@@ -85,6 +91,7 @@ public class DepartmentController {
         );
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteDepartment(
             @PathVariable Long id) {
@@ -94,6 +101,7 @@ public class DepartmentController {
         return ResponseEntity.noContent().build();
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','LAB_TECHNICIAN')")
     @GetMapping("/active")
     public ResponseEntity<ApiResponse<Page<DepartmentResponse>>> getActiveDepartments(
             Pageable pageable) {
@@ -110,6 +118,8 @@ public class DepartmentController {
         );
     }
 
+
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','LAB_TECHNICIAN')")
     @GetMapping("/search")
     public ResponseEntity<ApiResponse<Page<DepartmentResponse>>> searchDepartments(
             @RequestParam String keyword,

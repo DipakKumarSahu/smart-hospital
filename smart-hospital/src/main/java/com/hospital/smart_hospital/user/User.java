@@ -55,6 +55,7 @@ public class User extends AuditableEntity {
                 joinColumns = @JoinColumn(name = "user_id"),
                 inverseJoinColumns = @JoinColumn(name = "role_id")
         )
+        @Builder.Default
         private Set<Role> roles = new HashSet<>();
 
     @OneToOne(mappedBy = "user",
