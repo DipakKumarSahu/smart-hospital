@@ -3,12 +3,14 @@ package com.hospital.smart_hospital.patient.service.impl;
 import com.hospital.smart_hospital.exception.DuplicateResourceException;
 import com.hospital.smart_hospital.exception.ResourceNotFoundException;
 import com.hospital.smart_hospital.patient.dto.request.CreatePatientRequest;
+import com.hospital.smart_hospital.patient.dto.request.UpdateMyProfileRequest;
 import com.hospital.smart_hospital.patient.dto.request.UpdatePatientRequest;
 import com.hospital.smart_hospital.patient.dto.response.PatientResponse;
 import com.hospital.smart_hospital.patient.entity.Patient;
 import com.hospital.smart_hospital.patient.mapper.PatientMapper;
 import com.hospital.smart_hospital.patient.repository.PatientRepository;
 import com.hospital.smart_hospital.patient.service.PatientService;
+import com.hospital.smart_hospital.security.service.CurrentUserService;
 import com.hospital.smart_hospital.user.User;
 
 import com.hospital.smart_hospital.user.repositories.UserRepository;
@@ -28,23 +30,24 @@ public class PatientServiceImpl implements PatientService {
     private final PatientRepository patientRepository;
     private final UserRepository userRepository;
     private final PatientMapper patientMapper;
+    private final CurrentUserService currentUserService;
 
-    @Override
-    public PatientResponse createPatient(CreatePatientRequest request) {
-
-        validatePatient(request);
-
-        User user = getUser(request.getUserId());
-
-        Patient patient = patientMapper.toEntity(request);
-
-        patient.setUser(user);
-        patient.setPatientCode(generatePatientCode());
-
-        Patient savedPatient = patientRepository.save(patient);
-
-        return patientMapper.toResponse(savedPatient);
-    }
+//    @Override
+//    public PatientResponse createPatient(CreatePatientRequest request) {
+//
+//        validatePatient(request);
+//
+//        User user = getUser(request.getUserId());
+//
+//        Patient patient = patientMapper.toEntity(request);
+//
+//        patient.setUser(user);
+//        patient.setPatientCode(generatePatientCode());
+//
+//        Patient savedPatient = patientRepository.save(patient);
+//
+//        return patientMapper.toResponse(savedPatient);
+//    }
 
     @Override
     @Transactional(readOnly = true)
@@ -140,4 +143,42 @@ public class PatientServiceImpl implements PatientService {
                 count
         );
     }
+
+    @Override
+    @Transactional(readOnly = true)
+    public PatientResponse getMyProfile() {
+
+        Patient patient = currentUserService.getCurrentPatient();
+
+        return patientMapper.toResponse(patient);
+    }
+
+
+@Override
+public PatientResponse updateMyProfile(
+        UpdateMyProfileRequest request) {
+
+    Patient patient = currentUserService.getCurrentPatient();
+
+    User user = patient.getUser();
+
+    // Update User
+    user.setPhoneNumber(request.phoneNumber());
+
+    user.setProfileImageUrl(request.profileImageUrl());
+
+    // Update Patient
+    patient.setAddress(request.address());
+
+    patient.setEmergencyContactName(
+            request.emergencyContactName());
+
+    patient.setEmergencyContactNumber(
+            request.emergencyContactNumber());
+
+    Patient updatedPatient = patientRepository.save(patient);
+
+    return patientMapper.toResponse(updatedPatient);
+}
+
 }

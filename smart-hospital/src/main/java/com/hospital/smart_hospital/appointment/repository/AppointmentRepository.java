@@ -1,8 +1,5 @@
 package com.hospital.smart_hospital.appointment.repository;
 
-
-
-
 import com.hospital.smart_hospital.appointment.entity.Appointment;
 import com.hospital.smart_hospital.common.enums.AppointmentStatus;
 import com.hospital.smart_hospital.common.enums.PaymentStatus;
@@ -14,7 +11,8 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
-public interface AppointmentRepository extends JpaRepository<Appointment, Long> {
+public interface AppointmentRepository
+        extends JpaRepository<Appointment, Long> {
 
     // ==========================
     // Basic Queries
@@ -22,7 +20,9 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
 
     Optional<Appointment> findByIdAndActiveTrue(Long id);
 
-    Optional<Appointment> findByAppointmentCodeAndActiveTrue(String appointmentCode);
+    Optional<Appointment> findByAppointmentCodeAndActiveTrue(
+            String appointmentCode
+    );
 
     Page<Appointment> findByActiveTrue(Pageable pageable);
 
@@ -30,13 +30,14 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Search
     // ==========================
 
-    Page<Appointment> findByPatientUserFullNameContainingIgnoreCaseAndActiveTrue(
+    Page<Appointment>
+    findByPatientUserFullNameContainingIgnoreCaseAndActiveTrue(
             String keyword,
             Pageable pageable
     );
 
-    // Keep this only if it is already used.
-    Page<Appointment> findByDoctorStaffUserFullNameContainingIgnoreCaseAndActiveTrue(
+    Page<Appointment>
+    findByDoctorStaffUserFullNameContainingIgnoreCaseAndActiveTrue(
             String keyword,
             Pageable pageable
     );
@@ -45,13 +46,21 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Patient
     // ==========================
 
-    List<Appointment> findByPatientIdAndActiveTrue(Long patientId);
+    List<Appointment> findByPatientIdAndActiveTrue(
+            Long patientId
+    );
+
+    Page<Appointment> findByPatientIdAndActiveTrue(
+            Long patientId,
+            Pageable pageable
+    );
 
     // ==========================
     // Doctor
     // ==========================
 
-    List<Appointment> findByDoctorIdAndAppointmentDateAndActiveTrue(
+    List<Appointment>
+    findByDoctorIdAndAppointmentDateAndActiveTrue(
             Long doctorId,
             LocalDate appointmentDate
     );
@@ -60,7 +69,8 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Appointment Status
     // ==========================
 
-    List<Appointment> findByAppointmentDateAndStatusAndActiveTrue(
+    List<Appointment>
+    findByAppointmentDateAndStatusAndActiveTrue(
             LocalDate appointmentDate,
             AppointmentStatus status
     );
@@ -77,5 +87,7 @@ public interface AppointmentRepository extends JpaRepository<Appointment, Long> 
     // Validation
     // ==========================
 
-    boolean existsByAppointmentSlotIdAndActiveTrue(Long appointmentSlotId);
+    boolean existsByAppointmentSlotIdAndActiveTrue(
+            Long appointmentSlotId
+    );
 }
