@@ -8,7 +8,7 @@ public enum SlotStatus {
 
     BLOCKED,
 
-    RESERVED,
+    HELD,
 
     CANCELLED,
 

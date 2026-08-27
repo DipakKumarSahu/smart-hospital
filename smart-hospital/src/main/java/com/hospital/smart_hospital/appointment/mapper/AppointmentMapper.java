@@ -21,8 +21,8 @@ public interface AppointmentMapper {
     @Mapping(target = "appointmentSlot", ignore = true)
     @Mapping(target = "appointmentDate", ignore = true)
     @Mapping(target = "appointmentTime", ignore = true)
-    @Mapping(target = "status", ignore = true)
-    @Mapping(target = "paymentStatus", ignore = true)
+    @Mapping(target = "appointmentStatus", ignore = true)
+//    @Mapping(target = "paymentStatus", ignore = true)
     @Mapping(target = "active", ignore = true)
     Appointment toEntity(CreateAppointmentRequest request);
 

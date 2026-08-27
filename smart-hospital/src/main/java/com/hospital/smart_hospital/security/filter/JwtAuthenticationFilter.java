@@ -34,10 +34,14 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     FilterChain filterChain)
             throws ServletException, IOException {
 
+        System.out.println("REQUEST URI: " + request.getRequestURI());
+
         String authorizationHeader = request.getHeader(AUTHORIZATION_HEADER);
 
         if (!StringUtils.hasText(authorizationHeader)
                 || !authorizationHeader.startsWith(BEARER_PREFIX)) {
+
+            System.out.println("NO BEARER TOKEN - CONTINUING");
 
             filterChain.doFilter(request, response);
             return;

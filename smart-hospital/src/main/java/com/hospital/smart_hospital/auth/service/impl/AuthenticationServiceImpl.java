@@ -41,6 +41,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PatientRepository patientRepository;
     private final RoleRepository roleRepository;
     private final PasswordEncoder passwordEncoder;
+    private final EmailVerificationServiceImpl emailVerificationService;
 
     @Override
     @Transactional(readOnly = true)
@@ -79,6 +80,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         Patient patient = buildPatient(request, user);
 
         patientRepository.save(patient);
+
+        emailVerificationService.createAndSendVerificationToken(user.getId());
     }
 
     // =====================================================
@@ -114,7 +117,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .phoneNumber(request.phoneNumber())
                 .provider(AuthProvider.LOCAL)
                 .status(UserStatus.ACTIVE)
-                .emailVerified(true)
+                .emailVerified(false)
                 .build();
 
         user.getRoles().add(patientRole);

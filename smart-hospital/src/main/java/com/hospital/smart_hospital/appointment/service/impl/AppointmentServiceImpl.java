@@ -27,6 +27,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -81,18 +83,22 @@ public class AppointmentServiceImpl implements AppointmentService {
                 slot.getStartTime()
         );
 
-        appointment.setStatus(
-                AppointmentStatus.BOOKED
+//        appointment.setStatus(
+//                AppointmentStatus.BOOKED
+//        );
+
+        appointment.setAppointmentStatus(
+                AppointmentStatus.PAYMENT_PENDING
         );
 
-        appointment.setPaymentStatus(
-                PaymentStatus.PENDING
+        appointment.setPaymentExpiresAt(
+                LocalDateTime.now().plusMinutes(10)
         );
 
         appointment.setActive(true);
 
         slot.setStatus(
-                SlotStatus.BOOKED
+                SlotStatus.HELD
         );
 
         appointmentRepository.save(appointment);
@@ -214,16 +220,20 @@ public class AppointmentServiceImpl implements AppointmentService {
                 BookingSource.PATIENT
         );
 
-        appointment.setStatus(
-                AppointmentStatus.BOOKED
-        );
+//        appointment.setStatus(
+//                AppointmentStatus.BOOKED
+//        );
 
-        appointment.setPaymentStatus(
-                PaymentStatus.PENDING
+        appointment.setAppointmentStatus(
+                AppointmentStatus.PAYMENT_PENDING
         );
 
         appointment.setReasonForVisit(
                 request.reasonForVisit()
+        );
+
+        appointment.setPaymentExpiresAt(
+                LocalDateTime.now().plusMinutes(10)
         );
 
         appointment.setActive(true);
@@ -233,7 +243,7 @@ public class AppointmentServiceImpl implements AppointmentService {
          * only one transaction can change it at a time.
          */
         slot.setStatus(
-                SlotStatus.BOOKED
+                SlotStatus.HELD
         );
 
         Appointment savedAppointment =
@@ -303,7 +313,7 @@ public class AppointmentServiceImpl implements AppointmentService {
 
         validateCancellation(appointment);
 
-        appointment.setStatus(
+        appointment.setAppointmentStatus(
                 AppointmentStatus.CANCELLED
         );
 
@@ -440,7 +450,7 @@ public class AppointmentServiceImpl implements AppointmentService {
     private void validateCancellation(
             Appointment appointment) {
 
-        if (appointment.getStatus()
+        if (appointment.getAppointmentStatus()
                 == AppointmentStatus.COMPLETED) {
 
             throw new BadRequestException(
@@ -448,7 +458,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }
 
-        if (appointment.getStatus()
+        if (appointment.getAppointmentStatus()
                 == AppointmentStatus.CANCELLED) {
 
             throw new BadRequestException(
@@ -456,7 +466,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }
 
-        if (appointment.getStatus()
+        if (appointment.getAppointmentStatus()
                 == AppointmentStatus.NO_SHOW) {
 
             throw new BadRequestException(
@@ -464,7 +474,7 @@ public class AppointmentServiceImpl implements AppointmentService {
             );
         }
 
-        if (appointment.getStatus()
+        if (appointment.getAppointmentStatus()
                 == AppointmentStatus.EXPIRED) {
 
             throw new BadRequestException(

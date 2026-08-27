@@ -14,6 +14,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 
 @Entity
@@ -23,7 +24,10 @@ import java.time.LocalTime;
                 @Index(name = "idx_patient", columnList = "patient_id"),
                 @Index(name = "idx_doctor", columnList = "doctor_id"),
                 @Index(name = "idx_slot", columnList = "appointment_slot_id"),
-                @Index(name = "idx_status", columnList = "status"),
+                @Index(
+                        name = "idx_appointment_status",
+                        columnList = "appointment_status"
+                ),
                 @Index(name = "idx_date", columnList = "appointment_date")
         }
 )
@@ -66,13 +70,13 @@ public class Appointment extends AuditableEntity {
     @Column(nullable = false)
     private BookingSource bookingSource;
 
-    @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    private AppointmentStatus status = AppointmentStatus.BOOKED;
+//    @Enumerated(EnumType.STRING)
+//    @Column(nullable = false)
+//    private AppointmentStatus status = AppointmentStatus.BOOKED;
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private PaymentStatus paymentStatus = PaymentStatus.PENDING;
+    private AppointmentStatus appointmentStatus = AppointmentStatus.PAYMENT_PENDING;
 
     @Column(nullable = false, length = 500)
     private String reasonForVisit;
@@ -82,4 +86,7 @@ public class Appointment extends AuditableEntity {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    @Column(name = "payment_expires_at")
+    private LocalDateTime paymentExpiresAt;
 }

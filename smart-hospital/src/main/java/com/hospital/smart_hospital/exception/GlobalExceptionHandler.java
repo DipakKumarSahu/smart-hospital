@@ -1,6 +1,7 @@
 package com.hospital.smart_hospital.exception;
 
 import com.hospital.smart_hospital.common.dto.ValidationErrorResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.HashMap;
@@ -12,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 
+@Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
@@ -70,5 +72,23 @@ public class GlobalExceptionHandler {
                         .build();
 
         return ResponseEntity.badRequest().body(response);
+    }
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ApiResponse<Void>> handleException(
+            Exception ex) {
+
+        log.error("Unexpected error", ex);
+
+        return ResponseEntity
+                .status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(
+                        ApiResponse.<Void>builder()
+                                .success(false)
+                                .message(
+                                        "Something went wrong."
+                                )
+                                .build()
+                );
     }
 }

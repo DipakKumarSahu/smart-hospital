@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en"
+      xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
+    <title>Smart Hospital - Payment</title>
+
+    <script src="https://js.stripe.com/v3/"></script>
+</head>
+
+<body>
+
+<h2>Smart Hospital Payment</h2>
+
+<hr>
+
+<p>
+    Payment Code:
+    <strong th:text="${payment.paymentCode}">
+        PAY-000001
+    </strong>
+</p>
+
+<p>
+    Amount:
+    ₹<strong th:text="${payment.amount}">
+    0
+</strong>
+</p>
+
+<p>
+    Status:
+    <strong th:text="${payment.status}">
+        PENDING
+    </strong>
+</p>
+
+<hr>
+
+<form id="payment-form">
+
+    <div id="payment-element"></div>
+
+    <br>
+
+    <button type="submit" id="submit-button">
+        Pay Now
+    </button>
+
+    <p id="error-message"></p>
+
+</form>
+
+
+<script th:inline="javascript">
+
+    const stripe = Stripe(
+        /*[[${@environment.getProperty('stripe.publishable-key')}]]*/ ''
+    );
+
+    const clientSecret =
+        /*[[${payment.clientSecret}]]*/ '';
+
+    const elements = stripe.elements({
+        clientSecret: clientSecret
+    });
+
+    const paymentElement =
+        elements.create("payment");
+
+    paymentElement.mount("#payment-element");
+
+
+    document
+        .getElementById("payment-form")
+        .addEventListener(
+            "submit",
+            async function (event) {
+
+                event.preventDefault();
+
+                const submitButton =
+                    document.getElementById(
+                        "submit-button"
+                    );
+
+                submitButton.disabled = true;
+
+                const { error } =
+                    await stripe.confirmPayment({
+                        elements,
+                        confirmParams: {
+                            return_url:
+                                window.location.origin
+                                + "/payment/success"
+                        }
+                    });
+
+                if (error) {
+
+                    document
+                        .getElementById(
+                            "error-message"
+                        ).innerText =
+                            error.message;
+
+                    submitButton.disabled = false;
+                }
+            }
+        );
+
+</script>
+
+</body>
+</html>
