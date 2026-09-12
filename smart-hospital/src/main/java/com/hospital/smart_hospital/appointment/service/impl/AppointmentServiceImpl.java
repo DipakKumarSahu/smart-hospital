@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -483,14 +484,24 @@ public class AppointmentServiceImpl implements AppointmentService {
         }
     }
 
+//    private String generateAppointmentCode() {
+//
+//        long count =
+//                appointmentRepository.count() + 1;
+//
+//        return String.format(
+//                "APT-%06d",
+//                count
+//        );
+//    }
+//}
+
+
     private String generateAppointmentCode() {
-
-        long count =
-                appointmentRepository.count() + 1;
-
-        return String.format(
-                "APT-%06d",
-                count
-        );
+        return "PAY-" + UUID.randomUUID()
+                .toString()
+                .substring(0, 8)
+                .toUpperCase();
     }
+
 }

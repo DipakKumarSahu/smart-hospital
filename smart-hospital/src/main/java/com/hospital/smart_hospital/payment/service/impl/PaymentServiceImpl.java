@@ -26,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -175,15 +176,22 @@ public class PaymentServiceImpl implements PaymentService {
         }
     }
 
+//    private String generatePaymentCode() {
+//
+//        long count =
+//                paymentRepository.count() + 1;
+//
+//        return String.format(
+//                "PAY-%06d",
+//                count
+//        );
+//    }
+
     private String generatePaymentCode() {
-
-        long count =
-                paymentRepository.count() + 1;
-
-        return String.format(
-                "PAY-%06d",
-                count
-        );
+        return "PAY-" + UUID.randomUUID()
+                .toString()
+                .substring(0, 8)
+                .toUpperCase();
     }
 
     private PaymentResponse toResponse(

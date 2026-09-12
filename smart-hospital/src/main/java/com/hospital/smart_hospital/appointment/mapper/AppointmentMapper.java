@@ -38,6 +38,8 @@ public interface AppointmentMapper {
                            @MappingTarget Appointment appointment);
 
 
+    @Mapping(source = "appointmentStatus", target = "status")
+
     @Mapping(target = "active", ignore = true)
 
     @Mapping(source = "patient.id", target = "patientId")
