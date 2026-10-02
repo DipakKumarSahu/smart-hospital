@@ -7,6 +7,8 @@ import com.hospital.smart_hospital.doctor.dto.response.DoctorResponse;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
+import java.util.List;
+
 public interface DoctorService {
 
     DoctorResponse createDoctor(CreateDoctorRequest request);
@@ -30,5 +32,9 @@ public interface DoctorService {
             Pageable pageable
     );
 
+    //
+    List<DoctorResponse> getDoctorsByDepartmentCode(String departmentCode);
+
+    List<DoctorResponse> getDoctorsByDepartmentId(Long departmentId);
 
 }

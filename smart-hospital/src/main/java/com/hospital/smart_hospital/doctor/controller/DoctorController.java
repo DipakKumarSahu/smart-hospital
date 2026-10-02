@@ -1,4 +1,4 @@
-package com.hospital.smart_hospital.doctor;
+package com.hospital.smart_hospital.doctor.controller;
 
 import com.hospital.smart_hospital.common.dto.ApiResponse;
 import com.hospital.smart_hospital.doctor.dto.request.CreateDoctorRequest;
@@ -11,7 +11,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/api/v1/doctors")
@@ -105,6 +108,42 @@ public class DoctorController {
 
         return ResponseEntity.ok(
                 ApiResponse.<Page<DoctorResponse>>builder()
+                        .success(true)
+                        .message("Doctors fetched successfully.")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    // 👇 ADD THESE 2 ENDPOINTS
+
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','LAB_TECHNICIAN')")
+    @GetMapping("/department/code/{departmentCode}")
+    public ResponseEntity<ApiResponse<List<DoctorResponse>>> getDoctorsByDepartmentCode(
+            @PathVariable String departmentCode) {
+
+        List<DoctorResponse> response =
+                doctorService.getDoctorsByDepartmentCode(departmentCode);
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<DoctorResponse>>builder()
+                        .success(true)
+                        .message("Doctors fetched successfully.")
+                        .data(response)
+                        .build()
+        );
+    }
+
+    @PreAuthorize("hasAnyRole('ADMIN','DOCTOR','RECEPTIONIST','PATIENT','LAB_TECHNICIAN')")
+    @GetMapping("/department/id/{departmentId}")
+    public ResponseEntity<ApiResponse<List<DoctorResponse>>> getDoctorsByDepartmentId(
+            @PathVariable Long departmentId) {
+
+        List<DoctorResponse> response =
+                doctorService.getDoctorsByDepartmentId(departmentId);
+
+        return ResponseEntity.ok(
+                ApiResponse.<List<DoctorResponse>>builder()
                         .success(true)
                         .message("Doctors fetched successfully.")
                         .data(response)

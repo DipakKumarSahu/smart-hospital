@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios";
+import { authApi } from "../api/authApi";  // 👈 Ye import karo
 import { toast } from "react-toastify";
 
 const AuthContext = createContext();
@@ -12,6 +13,22 @@ export const useAuth = () => {
   return context;
 };
 
+// Token decode helper
+const decodeToken = (token) => {
+  try {
+    return JSON.parse(atob(token.split(".")[1]));
+  } catch {
+    return null;
+  }
+};
+
+const isTokenExpired = (token) => {
+  if (!token) return true;
+  const decoded = decodeToken(token);
+  if (!decoded || !decoded.exp) return true;
+  return decoded.exp * 1000 < Date.now();
+};
+
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -19,77 +36,65 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const token = localStorage.getItem("accessToken");
     const userData = localStorage.getItem("user");
-    if (token && userData) {
+
+    if (token && userData && !isTokenExpired(token)) {
       try {
         setUser(JSON.parse(userData));
-      } catch (error) {
-        console.error("Error parsing user data:", error);
+      } catch {
+        localStorage.removeItem("accessToken");
         localStorage.removeItem("user");
       }
+    } else {
+      localStorage.removeItem("accessToken");
+      localStorage.removeItem("user");
     }
     setLoading(false);
   }, []);
 
   const login = async (email, password) => {
     try {
-      const response = await api.post("/auth/login", { email, password });
-      console.log("Login response:", response.data);
+      const response = await authApi.login({ email, password });
+      const { accessToken } = response.data.data;
 
-      // Extract data from response
-      const { data } = response.data;
-      const { accessToken } = data;
-
-      if (!accessToken) {
-        throw new Error("No access token received");
-      }
-
-      // Store token
       localStorage.setItem("accessToken", accessToken);
 
-      // Since user data is not coming from login API,
-      // we need to fetch user profile separately
+      // Fetch profile after login
+      let userData = null;
       try {
-        // Try to get user profile
-        const profileResponse = await api.get("/patient/profile");
-        const userData = profileResponse.data.data;
-
-        // Store user data
-        localStorage.setItem("user", JSON.stringify(userData));
-        setUser(userData);
-
-        toast.success(`Welcome back, ${userData.fullName || "User"}! 🎉`);
-        return { success: true };
-      } catch (profileError) {
-        // If profile fetch fails, create a basic user object
-        // You might need to adjust this based on your backend
-        const basicUser = {
-          email: email,
+        const profileResponse = await api.get("/patient/profile", {
+          headers: { Authorization: `Bearer ${accessToken}` },
+        });
+        userData = profileResponse.data.data;
+        userData.roles = ["PATIENT"];
+      } catch {
+        userData = {
+          email,
           fullName: email.split("@")[0],
-          roles: ["PATIENT"], // Default role
+          roles: ["PATIENT"],
         };
-        localStorage.setItem("user", JSON.stringify(basicUser));
-        setUser(basicUser);
-        toast.success("Login successful!");
-        return { success: true };
       }
+
+      localStorage.setItem("user", JSON.stringify(userData));
+      setUser(userData);
+
+      toast.success(`Welcome back, ${userData.fullName}`);
+      return { success: true, user: userData };
     } catch (error) {
-      console.error("Login error:", error);
       const message =
-        error.response?.data?.message || error.message || "Login failed";
-      toast.error(message);
+        error.response?.data?.message || "Invalid email or password";
       return { success: false, error: message };
     }
   };
 
   const register = async (userData) => {
     try {
-      await api.post("/auth/register", userData);
-      toast.success("Registration successful! Please login.");
+      // 👇 Use authApi.registerPatient
+      await authApi.registerPatient(userData);
+      toast.success("Registration successful. Please sign in.");
       return { success: true };
     } catch (error) {
-      console.error("Registration error:", error);
-      const message = error.response?.data?.message || "Registration failed";
-      toast.error(message);
+      const message =
+        error.response?.data?.message || "Registration failed";
       return { success: false, error: message };
     }
   };
@@ -98,7 +103,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("accessToken");
     localStorage.removeItem("user");
     setUser(null);
-    toast.info("Logged out successfully");
+    toast.info("Logged out");
     window.location.href = "/login";
   };
 
@@ -109,7 +114,10 @@ export const AuthProvider = ({ children }) => {
     login,
     register,
     logout,
-    isAuthenticated: !!user && !!localStorage.getItem("accessToken"),
+    isAuthenticated:
+      !!user &&
+      !!localStorage.getItem("accessToken") &&
+      !isTokenExpired(localStorage.getItem("accessToken")),
     isAdmin: user?.roles?.includes("ADMIN"),
     isPatient: user?.roles?.includes("PATIENT"),
   };

@@ -87,6 +87,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/v1/payments/webhook/**")
                         .permitAll()
 
+                        .requestMatchers("/api/v1/payments/confirm")
+                        .permitAll()
+
                         .anyRequest()
                         .authenticated())
 

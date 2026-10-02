@@ -92,35 +92,54 @@ public class EmailVerificationServiceImpl
     }
 
     @Override
+//    public void verifyEmail(String token) {
+//
+//        EmailVerificationToken verificationToken =
+//                tokenRepository
+//                        .findByTokenAndUsedFalse(token)
+//                        .orElseThrow(() ->
+//                                new BadRequestException(
+//                                        "Invalid or expired verification token."
+//                                ));
+//
+//        if (verificationToken.getExpiresAt()
+//                .isBefore(LocalDateTime.now())) {
+//
+//            throw new BadRequestException(
+//                    "Verification token has expired."
+//            );
+//        }
+//
+//        User user = verificationToken.getUser();
+//
+//        user.setEmailVerified(true);
+//
+//        /*
+//         * Account becomes active after email verification.
+//         *
+//         * Phone verification will later be added here.
+//         */
+//        user.setStatus(UserStatus.ACTIVE);
+//
+//        verificationToken.setUsed(true);
+//
+//        userRepository.save(user);
+//        tokenRepository.save(verificationToken);
+//    }
+
+    // New for frontend
     public void verifyEmail(String token) {
+        EmailVerificationToken verificationToken = tokenRepository
+                .findByTokenAndUsedFalse(token)
+                .orElseThrow(() -> new BadRequestException("Invalid or expired verification token."));
 
-        EmailVerificationToken verificationToken =
-                tokenRepository
-                        .findByTokenAndUsedFalse(token)
-                        .orElseThrow(() ->
-                                new BadRequestException(
-                                        "Invalid or expired verification token."
-                                ));
-
-        if (verificationToken.getExpiresAt()
-                .isBefore(LocalDateTime.now())) {
-
-            throw new BadRequestException(
-                    "Verification token has expired."
-            );
+        if (verificationToken.getExpiresAt().isBefore(LocalDateTime.now())) {
+            throw new BadRequestException("Verification token has expired.");
         }
 
         User user = verificationToken.getUser();
-
         user.setEmailVerified(true);
-
-        /*
-         * Account becomes active after email verification.
-         *
-         * Phone verification will later be added here.
-         */
         user.setStatus(UserStatus.ACTIVE);
-
         verificationToken.setUsed(true);
 
         userRepository.save(user);

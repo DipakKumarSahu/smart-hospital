@@ -24,6 +24,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Year;
+import java.util.List;
 
 
 @Service
@@ -221,10 +222,41 @@ public class DoctorServiceImpl implements DoctorService {
         return doctors.map(doctorMapper::toResponse);
     }
 
+// 👇 ADD THESE 2 METHODS (existing methods ke baad)
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<DoctorResponse> getDoctorsByDepartmentCode(String departmentCode) {
 
+        // Verify department exists
+        departmentRepository.findByDepartmentCode(departmentCode)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Department not found with code: " + departmentCode
+                ));
 
+        return doctorRepository
+                .findByDepartmentDepartmentCodeIgnoreCaseAndActiveTrue(departmentCode)
+                .stream()
+                .map(doctorMapper::toResponse)
+                .toList();
+    }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<DoctorResponse> getDoctorsByDepartmentId(Long departmentId) {
+
+        // Verify department exists
+        departmentRepository.findById(departmentId)
+                .orElseThrow(() -> new ResourceNotFoundException(
+                        "Department not found with id: " + departmentId
+                ));
+
+        return doctorRepository
+                .findByDepartmentIdAndActiveTrue(departmentId)
+                .stream()
+                .map(doctorMapper::toResponse)
+                .toList();
+    }
 
 
 }

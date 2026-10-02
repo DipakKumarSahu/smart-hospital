@@ -40,6 +40,7 @@ const BookAppointment = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Client-side validation
     if (
       !formData.doctorId ||
       !formData.appointmentSlotId ||
@@ -49,25 +50,28 @@ const BookAppointment = () => {
       return;
     }
 
+    if (formData.reasonForVisit.length > 500) {
+      toast.error("Reason cannot exceed 500 characters");
+      return;
+    }
+
     setLoading(true);
     try {
       const response = await patientApi.bookAppointment({
         doctorId: parseInt(formData.doctorId),
         appointmentSlotId: parseInt(formData.appointmentSlotId),
         visitType: formData.visitType,
-        reasonForVisit: formData.reasonForVisit,
+        reasonForVisit: formData.reasonForVisit.trim(),
       });
 
       const appointment = response.data.data;
-      toast.success("Appointment created! Proceeding to payment...");
+      toast.success("Appointment booked. Proceeding to payment.");
 
       // Redirect to payment page
       navigate(`/payment/${appointment.id}`);
     } catch (error) {
-      console.error("Error booking appointment:", error);
-      toast.error(
-        error.response?.data?.message || "Failed to book appointment",
-      );
+      // Use backend message from axios interceptor
+      toast.error(error.userMessage || "Failed to book appointment");
     } finally {
       setLoading(false);
     }

@@ -36,4 +36,7 @@ export const patientApi = {
 
   // Get payment by ID
   getPaymentById: (id) => api.get(`/payments/${id}`),
+
+  confirmPayment: (paymentIntentId) => 
+    api.post('/payments/confirm', { paymentIntentId }),
 };

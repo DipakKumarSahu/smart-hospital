@@ -1,6 +1,7 @@
 package com.hospital.smart_hospital.payment.controller;
 
 import com.hospital.smart_hospital.common.dto.ApiResponse;
+import com.hospital.smart_hospital.payment.dto.request.ConfirmPaymentRequest;
 import com.hospital.smart_hospital.payment.dto.request.CreatePaymentRequest;
 import com.hospital.smart_hospital.payment.dto.response.PaymentResponse;
 import com.hospital.smart_hospital.payment.service.PaymentService;
@@ -48,4 +49,19 @@ public class PaymentController {
                 )
         );
     }
+
+    @PostMapping("/confirm")
+    public ApiResponse<Void> confirmPayment(
+            @Valid @RequestBody ConfirmPaymentRequest request) {
+
+        paymentService.handleStripePaymentSuccess(
+                request.paymentIntentId()
+        );
+
+        return ApiResponse.success(
+                "Payment confirmed successfully.",
+                null
+        );
+    }
+
 }
