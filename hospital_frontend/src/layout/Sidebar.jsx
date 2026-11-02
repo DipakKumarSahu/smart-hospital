@@ -1,11 +1,10 @@
 import React from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
   Calendar,
-  Pill,
   FileText,
   Settings,
   HelpCircle,
@@ -14,31 +13,46 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
-  ClipboardList,
+  Clock,
+  CalendarDays,
+  Stethoscope,
 } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
-import { useNavigate } from "react-router-dom";
 
 const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isPatient } = useAuth();
   const navigate = useNavigate();
 
+  const isDoctor = user?.roles?.includes("DOCTOR");
+
   // Role-based menu items
-  const adminMenuItems = [
-    { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
-    { path: "/patients", icon: Users, label: "Patients" },
-    { path: "/appointments", icon: Calendar, label: "Appointments" },
-    { path: "/reports", icon: ClipboardList, label: "Reports" },
-  ];
+  let menuItems = [];
 
-  const patientMenuItems = [
-    { path: "/profile", icon: User, label: "My Profile" },
-    { path: "/my-appointments", icon: Calendar, label: "My Appointments" },
-    { path: "/book-appointment", icon: Calendar, label: "Book Appointment" },
-    { path: "/my-prescriptions", icon: FileText, label: "Prescriptions" },
-  ];
-
-  const menuItems = isAdmin ? adminMenuItems : patientMenuItems;
+  if (isAdmin) {
+    menuItems = [
+      { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      { path: "/patients", icon: Users, label: "Patients" },
+      { path: "/doctors", icon: Stethoscope, label: "Doctors" },
+      { path: "/appointments", icon: Calendar, label: "Appointments" },
+    ];
+  } else if (isDoctor) {
+    menuItems = [
+      { path: "/doctor/dashboard", icon: LayoutDashboard, label: "Dashboard" },
+      {
+        path: "/doctor/appointments",
+        icon: CalendarDays,
+        label: "Appointments",
+      },
+      { path: "/doctor/schedule", icon: Clock, label: "My Schedule" },
+      { path: "/doctor/slots", icon: Calendar, label: "Manage Slots" },
+    ];
+  } else if (isPatient) {
+    menuItems = [
+      { path: "/profile", icon: User, label: "My Profile" },
+      { path: "/my-appointments", icon: Calendar, label: "My Appointments" },
+      { path: "/book-appointment", icon: Calendar, label: "Book Appointment" },
+    ];
+  }
 
   const bottomItems = [
     { path: "/settings", icon: Settings, label: "Settings" },
@@ -50,19 +64,27 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
     navigate("/login");
   };
 
+  // Role badge text for sidebar
+  const getRoleText = () => {
+    if (isAdmin) return "Administrator";
+    if (isDoctor) return "Doctor";
+    if (isPatient) return "Patient";
+    return "User";
+  };
+
   const SidebarContent = () => (
-    <div className="h-full flex flex-col bg-white border-r border-gray-200">
+    <div className="h-full flex flex-col bg-white border-r border-slate-200">
       {/* Logo */}
-      <div className="flex items-center justify-between p-4 border-b border-gray-200">
+      <div className="flex items-center justify-between p-4 border-b border-slate-200">
         <div className="flex items-center gap-3">
-          <Heart className="w-8 h-8 text-primary-500" />
+          <Heart className="w-8 h-8 text-[#0284c7]" />
           <AnimatePresence>
             {isOpen && (
               <motion.span
                 initial={{ opacity: 0, x: -10 }}
                 animate={{ opacity: 1, x: 0 }}
                 exit={{ opacity: 0, x: -10 }}
-                className="text-xl font-bold bg-gradient-to-r from-primary-600 to-primary-400 bg-clip-text text-transparent"
+                className="text-xl font-semibold text-slate-800"
               >
                 Smart Hospital
               </motion.span>
@@ -71,7 +93,7 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
         </div>
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="hidden lg:block p-1 rounded-lg hover:bg-gray-100 transition-colors"
+          className="hidden lg:block p-1 rounded-lg hover:bg-slate-100 text-slate-500 transition-colors"
         >
           {isOpen ? <ChevronLeft size={20} /> : <ChevronRight size={20} />}
         </button>
@@ -79,12 +101,12 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
 
       {/* User Info */}
       <div
-        className={`p-4 border-b border-gray-200 ${!isOpen && "text-center"}`}
+        className={`p-4 border-b border-slate-200 ${!isOpen && "text-center"}`}
       >
         <div
           className={`flex items-center ${isOpen ? "gap-3" : "justify-center"}`}
         >
-          <div className="w-10 h-10 rounded-full bg-gradient-to-br from-primary-400 to-primary-600 flex items-center justify-center text-white font-bold">
+          <div className="w-10 h-10 rounded-full bg-[#0284c7] flex items-center justify-center text-white font-medium shrink-0">
             {user?.fullName?.charAt(0) || "U"}
           </div>
           <AnimatePresence>
@@ -95,11 +117,11 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
                 exit={{ opacity: 0 }}
                 className="flex-1 min-w-0"
               >
-                <p className="text-sm font-semibold truncate">
+                <p className="text-sm font-semibold text-slate-800 truncate">
                   {user?.fullName || "User"}
                 </p>
-                <p className="text-xs text-gray-500 truncate">
-                  {isAdmin ? "Administrator" : "Patient"}
+                <p className="text-xs text-slate-500 truncate">
+                  {getRoleText()}
                 </p>
               </motion.div>
             )}
@@ -115,15 +137,15 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
             to={item.path}
             className={({ isActive }) => `
               flex items-center ${isOpen ? "gap-3 px-4" : "justify-center px-2"}
-              py-3 rounded-lg transition-all duration-200
+              py-3 rounded-lg transition-colors duration-200
               ${
                 isActive
-                  ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:bg-primary-50 hover:text-primary-600"
+                  ? "bg-[#0284c7] text-white"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-[#0284c7]"
               }
             `}
           >
-            <item.icon size={20} />
+            <item.icon size={20} className="shrink-0" />
             <AnimatePresence>
               {isOpen && (
                 <motion.span
@@ -141,22 +163,22 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
       </nav>
 
       {/* Bottom Menu */}
-      <div className="border-t border-gray-200 p-2 space-y-1">
+      <div className="border-t border-slate-200 p-2 space-y-1">
         {bottomItems.map((item) => (
           <NavLink
             key={item.path}
             to={item.path}
             className={({ isActive }) => `
               flex items-center ${isOpen ? "gap-3 px-4" : "justify-center px-2"}
-              py-3 rounded-lg transition-all duration-200
+              py-3 rounded-lg transition-colors duration-200
               ${
                 isActive
-                  ? "bg-gradient-to-r from-primary-500 to-primary-600 text-white shadow-lg"
-                  : "text-gray-600 hover:bg-primary-50 hover:text-primary-600"
+                  ? "bg-[#0284c7] text-white"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-[#0284c7]"
               }
             `}
           >
-            <item.icon size={20} />
+            <item.icon size={20} className="shrink-0" />
             <AnimatePresence>
               {isOpen && (
                 <motion.span
@@ -176,11 +198,11 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
           onClick={handleLogout}
           className={`
             w-full flex items-center ${isOpen ? "gap-3 px-4" : "justify-center px-2"}
-            py-3 rounded-lg transition-all duration-200
+            py-3 rounded-lg transition-colors duration-200
             text-red-600 hover:bg-red-50
           `}
         >
-          <LogOut size={20} />
+          <LogOut size={20} className="shrink-0" />
           <AnimatePresence>
             {isOpen && (
               <motion.span

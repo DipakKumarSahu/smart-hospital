@@ -9,7 +9,7 @@ import java.time.LocalTime;
 
 public record CreateDoctorScheduleRequest(
 
-        @NotNull
+//        @NotNull
         Long doctorId,
 
         @NotNull

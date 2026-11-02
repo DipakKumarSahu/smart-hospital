@@ -17,6 +17,7 @@ import com.hospital.smart_hospital.schedule.mapper.DoctorScheduleMapper;
 import com.hospital.smart_hospital.schedule.repository.DoctorScheduleRepository;
 import com.hospital.smart_hospital.schedule.service.DoctorScheduleService;
 
+import com.hospital.smart_hospital.security.service.CurrentUserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -37,10 +38,20 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
     private final AppointmentSlotService appointmentSlotService;
     private final AppointmentSlotRepository slotRepository;
 
+    private final CurrentUserService
+            currentUserService;
+
     @Override
     public DoctorScheduleResponse createSchedule(CreateDoctorScheduleRequest request) {
 
-        Doctor doctor = getDoctor(request.doctorId());
+        Doctor doctor;
+
+        // Admin bhejega toh doctorId hoga, Doctor bhejega toh JWT se nikalenge
+        if (request.doctorId() != null) {
+            doctor = getDoctor(request.doctorId());
+        } else {
+            doctor = currentUserService.getCurrentDoctor();
+        }
 
         validateTime(request.startTime(), request.endTime());
 
@@ -116,10 +127,14 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
                 id
         );
 
-        mapper.updateSchedule(request, schedule);
+        //  1. Purane non-booked slots delete karo (booked wale safe rahenge)
+        slotRepository.deleteNonBookedSlotsByScheduleId(schedule.getId());
 
+        // 2. Schedule ko update karo
+        mapper.updateSchedule(request, schedule);
         schedule = scheduleRepository.save(schedule);
 
+        // 3. Naye slots generate karo
         appointmentSlotService.generateSlots(schedule);
 
         return mapper.toResponse(schedule);
@@ -130,8 +145,11 @@ public class DoctorScheduleServiceImpl implements DoctorScheduleService {
 
         DoctorSchedule schedule = getSchedule(id);
 
-        schedule.setActive(false);
+        // Booked slots ko chhod kar baaki delete karo
+        slotRepository.deleteNonBookedSlotsByScheduleId(schedule.getId());
 
+        // Agar schedule ke saare slots booked hain, toh schedule ko soft delete (inactive) kar do
+        schedule.setActive(false);
         scheduleRepository.save(schedule);
     }
 

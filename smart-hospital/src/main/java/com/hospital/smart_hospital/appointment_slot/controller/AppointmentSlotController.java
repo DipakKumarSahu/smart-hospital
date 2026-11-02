@@ -11,6 +11,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -71,6 +72,7 @@ public class AppointmentSlotController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteSlot(
             @PathVariable Long id) {
@@ -83,6 +85,7 @@ public class AppointmentSlotController {
         );
     }
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @PatchMapping("/block")
     public ApiResponse<Void> blockSlots(
             @Valid @RequestBody BlockAppointmentSlotsRequest request) {
@@ -96,6 +99,7 @@ public class AppointmentSlotController {
     }
 
 
+    @PreAuthorize("hasAnyRole('ADMIN', 'DOCTOR')")
     @PatchMapping("/unblock")
     public ApiResponse<Void> unblockSlots(
             @Valid @RequestBody BlockAppointmentSlotsRequest request) {

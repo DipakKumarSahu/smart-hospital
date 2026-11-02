@@ -30,7 +30,7 @@ import java.util.List;
 @Transactional
 public class AppointmentSlotServiceImpl implements AppointmentSlotService {
 
-    private static final int DAYS_TO_GENERATE = 10;
+    private static final int DAYS_TO_GENERATE = 30;
 
     private final AppointmentSlotRepository slotRepository;
     private final AppointmentSlotMapper mapper;

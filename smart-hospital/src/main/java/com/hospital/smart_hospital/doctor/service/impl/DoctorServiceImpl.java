@@ -25,6 +25,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.Year;
 import java.util.List;
+import java.util.UUID;
 
 
 @Service
@@ -118,14 +119,8 @@ public class DoctorServiceImpl implements DoctorService {
     }
 
     private String generateDoctorCode() {
-
-        long count = doctorRepository.count() + 1;
-
-        return String.format(
-                "DOC-%d-%06d",
-                Year.now().getValue(),
-                count
-        );
+        return "DOC-" + Year.now().getValue() + "-" +
+                UUID.randomUUID().toString().substring(0, 6).toUpperCase();
     }
 
     @Override

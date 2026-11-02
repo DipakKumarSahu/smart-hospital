@@ -9,38 +9,79 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 import { AuthProvider, useAuth } from "./context/AuthContext";
 
-// Pages
+// Auth Pages
 import Login from "./pages/Login";
 import Register from "./pages/Register";
+
+// Admin Pages
 import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import CreatePatient from "./pages/CreatePatient";
 import EditPatient from "./pages/EditPatient";
-import PatientDetails from "./patients/PatientDetails";
+import PatientDetails from "./patients/PatientDetails"; // Path check kar lena
+
+// Patient Pages
 import Profile from "./pages/Profile";
-
-
-
 import BookAppointment from "./pages/BookAppointment";
 import MyAppointments from "./pages/MyAppointments";
 import PaymentPage from "./pages/PaymentPage";
 
-// Protected Route Component
+// Doctor Pages
+import DoctorDashboard from "./pages/doctor/DoctorDashboard";
+import DoctorSchedule from "./pages/doctor/DoctorSchedule";
+import DoctorSlots from "./pages/doctor/DoctorSlots";
+import DoctorAppointments from "./pages/doctor/DoctorAppointments";
+
+// =====================================================
+// Route Protectors
+// =====================================================
 const ProtectedRoute = ({ children }) => {
-  const { isAuthenticated } = useAuth();
-  return isAuthenticated ? children : <Navigate to="/login" />;
+  const { isAuthenticated, loading } = useAuth();
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  return isAuthenticated ? children : <Navigate to="/login" replace />;
 };
 
 const AdminRoute = ({ children }) => {
-  const { isAuthenticated, isAdmin } = useAuth();
-  return isAuthenticated && isAdmin ? children : <Navigate to="/dashboard" />;
+  const { isAuthenticated, isAdmin, loading } = useAuth();
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isAdmin) return <Navigate to="/dashboard" replace />;
+  return children;
 };
 
+const DoctorRoute = ({ children }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+  const isDoctor = user?.roles?.includes("DOCTOR");
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isDoctor) return <Navigate to="/dashboard" replace />; // Agar doctor nahi hai toh dashboard bhej do
+  return children;
+};
+
+// =====================================================
+// Main App
+// =====================================================
 function App() {
   return (
     <Router>
       <AuthProvider>
-        <div className="min-h-screen">
+        <div className="min-h-screen bg-slate-50">
           <ToastContainer
             position="top-right"
             autoClose={3000}
@@ -53,19 +94,23 @@ function App() {
             pauseOnHover
             theme="light"
           />
+
           <Routes>
+            {/* Public Routes */}
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
 
+            {/* Root Redirect */}
             <Route
               path="/"
               element={
                 <ProtectedRoute>
-                  <Navigate to="/dashboard" />
+                  <Navigate to="/dashboard" replace />
                 </ProtectedRoute>
               }
             />
 
+            {/* Admin Routes */}
             <Route
               path="/dashboard"
               element={
@@ -74,7 +119,6 @@ function App() {
                 </ProtectedRoute>
               }
             />
-
             <Route
               path="/patients"
               element={
@@ -83,7 +127,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="/patients/:id"
               element={
@@ -92,7 +135,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="/patients/create"
               element={
@@ -101,7 +143,6 @@ function App() {
                 </AdminRoute>
               }
             />
-
             <Route
               path="/patients/edit/:id"
               element={
@@ -111,26 +152,31 @@ function App() {
               }
             />
 
-
-// Routes mein add karo:
-<Route path="/book-appointment" element={
-  <ProtectedRoute>
-    <BookAppointment />
-  </ProtectedRoute>
-} />
-
-<Route path="/my-appointments" element={
-  <ProtectedRoute>
-    <MyAppointments />
-  </ProtectedRoute>
-} />
-
-<Route path="/payment/:appointmentId" element={
-  <ProtectedRoute>
-    <PaymentPage />
-  </ProtectedRoute>
-} />
-
+            {/* Patient Routes */}
+            <Route
+              path="/book-appointment"
+              element={
+                <ProtectedRoute>
+                  <BookAppointment />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/my-appointments"
+              element={
+                <ProtectedRoute>
+                  <MyAppointments />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payment/:appointmentId"
+              element={
+                <ProtectedRoute>
+                  <PaymentPage />
+                </ProtectedRoute>
+              }
+            />
             <Route
               path="/profile"
               element={
@@ -139,6 +185,43 @@ function App() {
                 </ProtectedRoute>
               }
             />
+
+            {/* Doctor Routes */}
+            <Route
+              path="/doctor/dashboard"
+              element={
+                <DoctorRoute>
+                  <DoctorDashboard />
+                </DoctorRoute>
+              }
+            />
+            <Route
+              path="/doctor/schedule"
+              element={
+                <DoctorRoute>
+                  <DoctorSchedule />
+                </DoctorRoute>
+              }
+            />
+            <Route
+              path="/doctor/slots"
+              element={
+                <DoctorRoute>
+                  <DoctorSlots />
+                </DoctorRoute>
+              }
+            />
+            <Route
+              path="/doctor/appointments"
+              element={
+                <DoctorRoute>
+                  <DoctorAppointments />
+                </DoctorRoute>
+              }
+            />
+
+            {/* 404 - Catch All */}
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
           </Routes>
         </div>
       </AuthProvider>
