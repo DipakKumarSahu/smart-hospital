@@ -32,7 +32,7 @@ const Sidebar = ({ isOpen, setIsOpen, mobileOpen, setMobileOpen }) => {
     menuItems = [
       { path: "/dashboard", icon: LayoutDashboard, label: "Dashboard" },
       { path: "/patients", icon: Users, label: "Patients" },
-      { path: "/doctors", icon: Stethoscope, label: "Doctors" },
+      { path: "/admin/doctors", icon: Stethoscope, label: "Doctors" },
       { path: "/appointments", icon: Calendar, label: "Appointments" },
     ];
   } else if (isDoctor) {

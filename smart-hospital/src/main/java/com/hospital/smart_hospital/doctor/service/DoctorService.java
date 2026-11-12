@@ -37,4 +37,7 @@ public interface DoctorService {
 
     List<DoctorResponse> getDoctorsByDepartmentId(Long departmentId);
 
+    //Admin
+    Page<DoctorResponse> getDoctorsForAdmin(String keyword, Pageable pageable);
+
 }

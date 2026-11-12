@@ -55,10 +55,19 @@ const Login = () => {
       const result = await login(email, password);
 
       if (result.success) {
-        // Role-based redirect
-        const redirectPath = result.user?.roles?.includes("ADMIN")
-          ? "/dashboard"
-          : "/profile";
+        // 👇 Naya Role Check (ADMIN ya ROLE_ADMIN dono handle karega)
+        const isAdmin = result.user?.roles?.some(
+          (role) => role === "ADMIN" || role === "ROLE_ADMIN",
+        );
+        const isDoctor = result.user?.roles?.some(
+          (role) => role === "DOCTOR" || role === "ROLE_DOCTOR",
+        );
+
+        // Redirect based on role
+        let redirectPath = "/profile"; // Default for Patient
+        if (isAdmin) redirectPath = "/dashboard";
+        else if (isDoctor) redirectPath = "/doctor/dashboard";
+
         navigate(redirectPath, { replace: true });
       } else {
         setError(result.error || "Invalid email or password");
@@ -82,7 +91,7 @@ const Login = () => {
           <Tilt tiltMaxAngleX={4} tiltMaxAngleY={4}>
             <div className="bg-white rounded-2xl p-8 border border-slate-200 shadow-sm">
               <div className="flex items-center gap-3 mb-6">
-                <div className="w-11 h-11 rounded-lg bg-primary-600 flex items-center justify-center">
+                <div className="w-11 h-11 rounded-lg bg-[#0284c7] flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white" />
                 </div>
                 <div>
@@ -143,7 +152,7 @@ const Login = () => {
           <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8">
             <div className="text-center mb-8">
               <div className="lg:hidden flex justify-center mb-4">
-                <div className="w-12 h-12 rounded-lg bg-primary-600 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-lg bg-[#0284c7] flex items-center justify-center">
                   <Heart className="w-6 h-6 text-white" />
                 </div>
               </div>
@@ -170,7 +179,7 @@ const Login = () => {
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="you@hospital.com"
-                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-colors bg-white text-slate-800 placeholder:text-slate-400"
+                    className="w-full pl-10 pr-4 py-2.5 rounded-lg border border-slate-300 focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/10 transition-colors bg-white text-slate-800 placeholder:text-slate-400"
                     disabled={loading}
                     autoComplete="email"
                   />
@@ -191,7 +200,7 @@ const Login = () => {
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
                     placeholder="Enter your password"
-                    className="w-full pl-10 pr-12 py-2.5 rounded-lg border border-slate-300 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/10 transition-colors bg-white text-slate-800 placeholder:text-slate-400"
+                    className="w-full pl-10 pr-12 py-2.5 rounded-lg border border-slate-300 focus:border-[#0284c7] focus:ring-2 focus:ring-[#0284c7]/10 transition-colors bg-white text-slate-800 placeholder:text-slate-400"
                     disabled={loading}
                     autoComplete="current-password"
                   />
@@ -223,7 +232,7 @@ const Login = () => {
               <button
                 type="submit"
                 disabled={loading}
-                className="w-full bg-primary-600 hover:bg-primary-700 text-black font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full bg-[#0284c7] hover:bg-[#0369a1] text-white font-medium py-2.5 rounded-lg transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 {loading ? (
                   <>
@@ -244,7 +253,7 @@ const Login = () => {
                 Don't have an account?{" "}
                 <Link
                   to="/register"
-                  className="text-primary-600 hover:text-primary-700 font-medium hover:underline"
+                  className="text-[#0284c7] hover:text-[#0369a1] font-medium hover:underline"
                 >
                   Create one
                 </Link>

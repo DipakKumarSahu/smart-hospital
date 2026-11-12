@@ -25,6 +25,9 @@ public class UpdateDoctorRequest {
     @DecimalMin(value = "0.0", inclusive = false)
     private BigDecimal consultationFee;
 
+    @NotBlank(message = "License number is required.")
+    private String licenseNumber;
+
     @NotNull(message = "Department is required.")
     private Long departmentId;
 

@@ -12,4 +12,6 @@ export const doctorApi = {
 
   // Get doctors by department ID
   getByDepartmentId: (id) => api.get(`/doctors/department/id/${id}`),
+
+  getAllForAdmin: (params) => api.get("/doctors/admin/all", { params }),
 };

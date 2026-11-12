@@ -150,4 +150,25 @@ public class DoctorController {
                         .build()
         );
     }
+
+    //Admin
+    // src/main/java/com/hospital/smart_hospital/doctor/controller/DoctorController.java
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/admin/all")
+    public ResponseEntity<ApiResponse<Page<DoctorResponse>>> getAllDoctorsForAdmin(
+            @RequestParam(required = false) String keyword,
+            Pageable pageable) {
+
+        // Note: Aapko Service mein isko implement karna hoga, jo existing getDoctors jaisa hi hai
+        Page<DoctorResponse> response = doctorService.getDoctorsForAdmin(keyword, pageable);
+
+        return ResponseEntity.ok(
+                ApiResponse.<Page<DoctorResponse>>builder()
+                        .success(true)
+                        .message("All doctors fetched successfully.")
+                        .data(response)
+                        .build()
+        );
+    }
 }

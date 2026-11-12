@@ -2,6 +2,7 @@ package com.hospital.smart_hospital.security.controller;
 
 
 
+import com.hospital.smart_hospital.auth.dto.request.CreateDoctorByAdminRequest;
 import com.hospital.smart_hospital.auth.dto.request.RegisterPatientRequest;
 import com.hospital.smart_hospital.common.dto.ApiResponse;
 import com.hospital.smart_hospital.auth.dto.request.LoginRequest;
@@ -11,6 +12,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -48,4 +50,16 @@ public class AuthenticationController {
                         )
                 );
     }
+
+    @PostMapping("/admin/register-doctor")
+    @PreAuthorize("hasRole('ADMIN')") // 👈 Sirf Admin hi access kar sakta hai
+    public ResponseEntity<ApiResponse<Void>> registerDoctorByAdmin(
+            @Valid @RequestBody CreateDoctorByAdminRequest request) {
+
+        authenticationService.createDoctorByAdmin(request);
+
+        return ResponseEntity.status(HttpStatus.CREATED)
+                .body(ApiResponse.success("Doctor registered successfully and email sent.", null));
+    }
+
 }

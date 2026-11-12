@@ -253,5 +253,20 @@ public class DoctorServiceImpl implements DoctorService {
                 .toList();
     }
 
+    //Admin
+    @Override
+    @Transactional(readOnly = true)
+    public Page<DoctorResponse> getDoctorsForAdmin(String keyword, Pageable pageable) {
+        if (keyword == null || keyword.isBlank()) {
+            // Saare doctors laao (inactive bhi)
+            return doctorRepository.findAllByOrderByActiveDescIdDesc(pageable)
+                    .map(doctorMapper::toResponse);
+        }
+        // Search ke saath
+        return doctorRepository.searchDoctorsForAdmin(keyword, pageable)
+                .map(doctorMapper::toResponse);
+    }
+
+
 
 }

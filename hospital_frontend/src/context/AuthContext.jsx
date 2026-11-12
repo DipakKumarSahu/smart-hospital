@@ -1,22 +1,28 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 import api from "../api/axios";
-import { authApi } from "../api/authApi";  // 👈 Ye import karo
+import { authApi } from "../api/authApi";
 import { toast } from "react-toastify";
 
 const AuthContext = createContext();
 
 export const useAuth = () => {
   const context = useContext(AuthContext);
-  if (!context) {
-    throw new Error("useAuth must be used within AuthProvider");
-  }
+  if (!context) throw new Error("useAuth must be used within AuthProvider");
   return context;
 };
 
 // Token decode helper
 const decodeToken = (token) => {
   try {
-    return JSON.parse(atob(token.split(".")[1]));
+    const base64Url = token.split(".")[1];
+    const base64 = base64Url.replace(/-/g, "+").replace(/_/g, "/");
+    const jsonPayload = decodeURIComponent(
+      atob(base64)
+        .split("")
+        .map((c) => "%" + ("00" + c.charCodeAt(0).toString(16)).slice(-2))
+        .join(""),
+    );
+    return JSON.parse(jsonPayload);
   } catch {
     return null;
   }
@@ -58,21 +64,35 @@ export const AuthProvider = ({ children }) => {
 
       localStorage.setItem("accessToken", accessToken);
 
-      // Fetch profile after login
-      let userData = null;
-      try {
-        const profileResponse = await api.get("/patient/profile", {
-          headers: { Authorization: `Bearer ${accessToken}` },
-        });
-        userData = profileResponse.data.data;
-        userData.roles = ["PATIENT"];
-      } catch {
-        userData = {
-          email,
-          fullName: email.split("@")[0],
-          roles: ["PATIENT"],
-        };
+      // 👇 1. Token Decode karo
+      const decoded = decodeToken(accessToken);
+
+      // 👇 2. Token se roles nikaalo (Spring Security inhe "roles" ya "authorities" mein bhejta hai)
+      let userRoles = decoded?.roles || decoded?.authorities || [];
+
+      // Agar roles object format mein hain (e.g. [{authority: "ROLE_ADMIN"}]), toh unhe string banao
+      if (userRoles.length > 0 && typeof userRoles[0] === "object") {
+        userRoles = userRoles.map((r) => r.authority || r.name);
       }
+
+      // 👇 3. Roles clean karo (Agar backend ROLE_ prefix bhej raha hai, toh hata do)
+      userRoles = userRoles.map((role) => role.replace("ROLE_", ""));
+
+      // 👇 4. Agar roles khaali hain (token mein nahi hain), toh email se guess karo (Fallback)
+      if (userRoles.length === 0) {
+        if (email.includes("admin")) userRoles = ["ADMIN"];
+        else if (email.includes("doctor")) userRoles = ["DOCTOR"];
+        else userRoles = ["PATIENT"];
+      }
+
+      // 👇 5. User Data save karo (Profile API call hatadi)
+      const userData = {
+        email: email,
+        fullName: decoded?.sub
+          ? decoded.sub.split("@")[0]
+          : email.split("@")[0],
+        roles: userRoles, // Ab yahan ADMIN/DOCTOR/PATIENT sahi aayega
+      };
 
       localStorage.setItem("user", JSON.stringify(userData));
       setUser(userData);
@@ -88,13 +108,11 @@ export const AuthProvider = ({ children }) => {
 
   const register = async (userData) => {
     try {
-      // 👇 Use authApi.registerPatient
       await authApi.registerPatient(userData);
       toast.success("Registration successful. Please sign in.");
       return { success: true };
     } catch (error) {
-      const message =
-        error.response?.data?.message || "Registration failed";
+      const message = error.response?.data?.message || "Registration failed";
       return { success: false, error: message };
     }
   };
@@ -119,6 +137,7 @@ export const AuthProvider = ({ children }) => {
       !!localStorage.getItem("accessToken") &&
       !isTokenExpired(localStorage.getItem("accessToken")),
     isAdmin: user?.roles?.includes("ADMIN"),
+    isDoctor: user?.roles?.includes("DOCTOR"),
     isPatient: user?.roles?.includes("PATIENT"),
   };
 

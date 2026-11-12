@@ -2,6 +2,9 @@ import React, { useEffect, useState } from "react";
 import { motion } from "framer-motion";
 import Layout from "../layout/Layout";
 import Card from "../components/common/Card";
+import { staffApi } from "../api/staffApi";
+import { patientApi } from "../api/patientApi";
+import { useAuth } from "../context/AuthContext";
 import {
   Users,
   UserPlus,
@@ -9,9 +12,9 @@ import {
   Calendar,
   TrendingUp,
   Heart,
+  UserCheck,
+  UserX,
 } from "lucide-react";
-import { useAuth } from "../context/AuthContext";
-import { patientApi } from "../api/patientApi";
 import {
   BarChart,
   Bar,
@@ -33,46 +36,60 @@ const Dashboard = () => {
     appointments: 0,
   });
 
+  const [staffStats, setStaffStats] = useState({
+    total: 0,
+    active: 0,
+    inactive: 0,
+  });
+
   useEffect(() => {
     if (isAdmin) {
-      patientApi.getPatients({ page: 0, size: 1 }).then((res) => {
-        const data = res.data.data;
-        setStats((prev) => ({
-          ...prev,
-          totalPatients: data.totalElements || 0,
-        }));
-      });
+       if (typeof patientApi.getPatients === "function") {
+      patientApi
+        .getPatients({ page: 0, size: 1 })
+        .then((res) => {
+          const data = res.data.data;
+          setStats((prev) => ({
+            ...prev,
+            totalPatients: data.totalElements || 0,
+          }));
+        })
+        .catch(console.error);
+      }
     }
   }, [isAdmin]);
+
+  useEffect(() => {
+    staffApi
+      .getStats()
+      .then((res) => setStaffStats(res.data.data))
+      .catch(console.error);
+  }, []);
 
   const statsData = [
     {
       title: "Total Patients",
       value: stats.totalPatients,
       icon: Users,
-      color: "from-primary-500 to-primary-600",
-      change: "+12%",
+      color: "bg-[#0284c7]", // Sky blue
     },
     {
       title: "New Patients",
-      value: stats.newPatients || 24,
+      value: stats.newPatients || 0,
       icon: UserPlus,
-      color: "from-green-500 to-green-600",
-      change: "+8%",
+      color: "bg-green-600",
     },
     {
       title: "Active Patients",
-      value: stats.activePatients || 156,
+      value: stats.activePatients || 0,
       icon: Activity,
-      color: "from-blue-500 to-blue-600",
-      change: "+5%",
+      color: "bg-blue-600",
     },
     {
       title: "Appointments",
-      value: stats.appointments || 43,
+      value: stats.appointments || 0,
       icon: Calendar,
-      color: "from-purple-500 to-purple-600",
-      change: "+15%",
+      color: "bg-purple-600",
     },
   ];
 
@@ -102,22 +119,22 @@ const Dashboard = () => {
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 text-white shadow-xl"
+          className="bg-[#0284c7] rounded-2xl p-6 text-white shadow-sm"
         >
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold">
-                Welcome back, {user?.fullName || "User"}! 👋
+              <h1 className="text-2xl font-semibold">
+                Welcome back, {user?.fullName || "User"}
               </h1>
-              <p className="text-primary-100 mt-2">
-                Here's what's happening with your hospital today
+              <p className="text-blue-100 mt-1 text-sm">
+                Here is what's happening with your hospital today.
               </p>
             </div>
-            <Heart className="w-12 h-12 text-white/30" />
+            <Heart className="w-10 h-10 text-white/20" />
           </div>
         </motion.div>
 
-        {/* Stats Grid */}
+        {/* Stats Grid (Patients) */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {statsData.map((stat, index) => (
             <motion.div
@@ -129,19 +146,15 @@ const Dashboard = () => {
               <Card hover className="overflow-hidden">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-sm text-gray-500 font-medium">
+                    <p className="text-sm text-slate-500 font-medium">
                       {stat.title}
                     </p>
-                    <p className="text-2xl font-bold mt-1">{stat.value}</p>
-                    <p className="text-xs text-green-500 mt-1 flex items-center">
-                      <TrendingUp size={12} className="mr-1" />
-                      {stat.change}
+                    <p className="text-2xl font-semibold text-slate-800 mt-1">
+                      {stat.value}
                     </p>
                   </div>
-                  <div
-                    className={`bg-gradient-to-br ${stat.color} p-3 rounded-xl text-white`}
-                  >
-                    <stat.icon size={24} />
+                  <div className={`${stat.color} p-3 rounded-xl text-white`}>
+                    <stat.icon size={22} />
                   </div>
                 </div>
               </Card>
@@ -149,27 +162,64 @@ const Dashboard = () => {
           ))}
         </div>
 
+        {/* Staff Stats Card (Admin only) */}
+        {isAdmin && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <Card hover>
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <div className="w-12 h-12 rounded-lg bg-[#0284c7]/10 flex items-center justify-center text-[#0284c7]">
+                    <Users size={24} />
+                  </div>
+                  <div>
+                    <p className="text-sm text-slate-500 font-medium">
+                      Total Hospital Staff
+                    </p>
+                    <p className="text-2xl font-semibold text-slate-800">
+                      {staffStats.total}
+                    </p>
+                  </div>
+                </div>
+                <div className="flex gap-4 text-sm">
+                  <span className="text-green-600 flex items-center gap-1.5 bg-green-50 px-3 py-1.5 rounded-lg">
+                    <UserCheck size={16} /> {staffStats.active} Active
+                  </span>
+                  <span className="text-red-600 flex items-center gap-1.5 bg-red-50 px-3 py-1.5 rounded-lg">
+                    <UserX size={16} /> {staffStats.inactive} Inactive
+                  </span>
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+        )}
+
         {/* Charts */}
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.4 }}
           >
             <Card>
-              <h3 className="text-lg font-semibold mb-4">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
                 Weekly Patient Visits
               </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#e2e8f0"
+                    />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                    <YAxis axisLine={false} tickLine={false} />
                     <Tooltip />
                     <Bar
                       dataKey="patients"
-                      fill="#0ea5e9"
+                      fill="#0284c7"
                       radius={[4, 4, 0, 0]}
                     />
                   </BarChart>
@@ -181,25 +231,28 @@ const Dashboard = () => {
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.5 }}
           >
             <Card>
-              <h3 className="text-lg font-semibold mb-4">
+              <h3 className="text-lg font-semibold text-slate-800 mb-4">
                 Monthly Visits Trend
               </h3>
               <div className="h-64">
                 <ResponsiveContainer width="100%" height="100%">
                   <LineChart data={activityData}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" />
-                    <YAxis />
+                    <CartesianGrid
+                      strokeDasharray="3 3"
+                      vertical={false}
+                      stroke="#e2e8f0"
+                    />
+                    <XAxis dataKey="name" axisLine={false} tickLine={false} />
+                    <YAxis axisLine={false} tickLine={false} />
                     <Tooltip />
                     <Line
                       type="monotone"
                       dataKey="visits"
-                      stroke="#0ea5e9"
+                      stroke="#0284c7"
                       strokeWidth={3}
-                      dot={{ fill: "#0ea5e9" }}
+                      dot={{ fill: "#0284c7", r: 4 }}
                     />
                   </LineChart>
                 </ResponsiveContainer>
@@ -207,36 +260,6 @@ const Dashboard = () => {
             </Card>
           </motion.div>
         </div>
-
-        {/* Recent Activity */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card>
-            <h3 className="text-lg font-semibold mb-4">Recent Activity</h3>
-            <div className="space-y-3">
-              {[1, 2, 3, 4].map((_, index) => (
-                <div
-                  key={index}
-                  className="flex items-center gap-4 p-3 rounded-lg hover:bg-gray-50 transition-colors"
-                >
-                  <div className="w-10 h-10 rounded-full bg-primary-100 flex items-center justify-center text-primary-600">
-                    <UserPlus size={20} />
-                  </div>
-                  <div className="flex-1">
-                    <p className="font-medium">New patient registered</p>
-                    <p className="text-sm text-gray-500">2 minutes ago</p>
-                  </div>
-                  <span className="text-xs bg-green-100 text-green-600 px-2 py-1 rounded-full">
-                    New
-                  </span>
-                </div>
-              ))}
-            </div>
-          </Card>
-        </motion.div>
       </div>
     </Layout>
   );

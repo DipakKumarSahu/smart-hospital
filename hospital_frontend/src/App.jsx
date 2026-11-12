@@ -18,7 +18,9 @@ import Dashboard from "./pages/Dashboard";
 import Patients from "./pages/Patients";
 import CreatePatient from "./pages/CreatePatient";
 import EditPatient from "./pages/EditPatient";
-import PatientDetails from "./patients/PatientDetails"; // Path check kar lena
+import StaffManagement from "./pages/Admin/StaffManagement";
+
+import DoctorsManagement from "./pages/Admin/DoctorsManagement";
 
 // Patient Pages
 import Profile from "./pages/Profile";
@@ -61,7 +63,9 @@ const AdminRoute = ({ children }) => {
 
 const DoctorRoute = ({ children }) => {
   const { isAuthenticated, user, loading } = useAuth();
-  const isDoctor = user?.roles?.includes("DOCTOR");
+  const isDoctor = user?.roles?.some(
+    (r) => r === "DOCTOR" || r === "ROLE_DOCTOR",
+  );
 
   if (loading)
     return (
@@ -70,7 +74,25 @@ const DoctorRoute = ({ children }) => {
       </div>
     );
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (!isDoctor) return <Navigate to="/dashboard" replace />; // Agar doctor nahi hai toh dashboard bhej do
+  if (!isDoctor) return <Navigate to="/dashboard" replace />;
+  return children;
+};
+
+// 👇 NEW: PatientRoute (Admin ko profile page pe jaane se rokega)
+const PatientRoute = ({ children }) => {
+  const { isAuthenticated, user, loading } = useAuth();
+  const isPatient = user?.roles?.some(
+    (role) => role === "PATIENT" || role === "ROLE_PATIENT",
+  );
+
+  if (loading)
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        Loading...
+      </div>
+    );
+  if (!isAuthenticated) return <Navigate to="/login" replace />;
+  if (!isPatient) return <Navigate to="/dashboard" replace />; // Agar admin/doctor hai toh dashboard bhej do
   return children;
 };
 
@@ -128,14 +150,6 @@ function App() {
               }
             />
             <Route
-              path="/patients/:id"
-              element={
-                <AdminRoute>
-                  <PatientDetails />
-                </AdminRoute>
-              }
-            />
-            <Route
               path="/patients/create"
               element={
                 <AdminRoute>
@@ -151,38 +165,56 @@ function App() {
                 </AdminRoute>
               }
             />
+            <Route
+              path="/admin/doctors"
+              element={
+                <AdminRoute>
+                  <DoctorsManagement />
+                </AdminRoute>
+              }
+            />
 
-            {/* Patient Routes */}
+            {/* Staff Management Route */}
+            <Route
+              path="/admin/staff"
+              element={
+                <AdminRoute>
+                  <StaffManagement />
+                </AdminRoute>
+              }
+            />
+
+            {/* Patient Routes (Protected by PatientRoute) */}
             <Route
               path="/book-appointment"
               element={
-                <ProtectedRoute>
+                <PatientRoute>
                   <BookAppointment />
-                </ProtectedRoute>
+                </PatientRoute>
               }
             />
             <Route
               path="/my-appointments"
               element={
-                <ProtectedRoute>
+                <PatientRoute>
                   <MyAppointments />
-                </ProtectedRoute>
+                </PatientRoute>
               }
             />
             <Route
               path="/payment/:appointmentId"
               element={
-                <ProtectedRoute>
+                <PatientRoute>
                   <PaymentPage />
-                </ProtectedRoute>
+                </PatientRoute>
               }
             />
             <Route
               path="/profile"
               element={
-                <ProtectedRoute>
+                <PatientRoute>
                   <Profile />
-                </ProtectedRoute>
+                </PatientRoute>
               }
             />
 

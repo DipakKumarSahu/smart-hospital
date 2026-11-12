@@ -200,4 +200,41 @@ public class EmailVerificationServiceImpl
                 TOKEN_EXPIRY_MINUTES
         );
     }
+
+    @Override
+    // 👇 NAYA METHOD: Doctor ke liye Welcome Email
+    public void sendDoctorWelcomeEmail(String fullName, String email, String rawPassword) {
+        String html = """
+                <!DOCTYPE html>
+                <html>
+                <body style="font-family: sans-serif; color: #333;">
+                    <h2>Welcome to Smart Hospital</h2>
+                    <p>Hello Dr. %s,</p>
+                    <p>Your Doctor account has been created successfully by the Admin.</p>
+                    <p>Here are your login credentials:</p>
+                    <table style="border-collapse: collapse; margin: 15px 0;">
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Email:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">%s</td>
+                        </tr>
+                        <tr>
+                            <td style="padding: 8px; border: 1px solid #ddd; background: #f9f9f9;"><strong>Password:</strong></td>
+                            <td style="padding: 8px; border: 1px solid #ddd;">%s</td>
+                        </tr>
+                    </table>
+                    <p>Please login to the portal and change your password for security.</p>
+                    <p>Regards,<br>Smart Hospital Admin</p>
+                </body>
+                </html>
+                """.formatted(fullName, email, rawPassword);
+
+        try {
+            // 👇 Dhyan se check karo: (to, subject, body) order mein hona chahiye
+            emailService.sendEmail(email, "Welcome to Smart Hospital - Doctor Account", html);
+        } catch (Exception e) {
+            // Agar email fail ho jaye, toh log karo par aage badho
+            System.err.println("Failed to send welcome email to: " + email);
+            e.printStackTrace();
+        }
+    }
 }

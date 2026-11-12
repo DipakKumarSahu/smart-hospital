@@ -2,6 +2,7 @@ package com.hospital.smart_hospital.exception;
 
 import com.hospital.smart_hospital.common.dto.ValidationErrorResponse;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.authorization.AuthorizationDeniedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 
 import java.util.HashMap;
@@ -90,5 +91,11 @@ public class GlobalExceptionHandler {
                                 )
                                 .build()
                 );
+    }
+
+    @ExceptionHandler(AuthorizationDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAuthorizationDenied(AuthorizationDeniedException ex) {
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.failure("You do not have permission to access this resource."));
     }
 }

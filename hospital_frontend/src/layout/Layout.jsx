@@ -9,13 +9,13 @@ const Layout = ({ children }) => {
   const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-slate-50">
       {/* Mobile Menu Button */}
       <button
         onClick={() => setMobileSidebarOpen(!mobileSidebarOpen)}
-        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white shadow-lg hover:shadow-xl transition-all"
+        className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-lg bg-white border border-slate-200 shadow-sm hover:bg-slate-50 transition-all"
       >
-        <Menu size={24} className="text-gray-700" />
+        <Menu size={24} className="text-slate-700" />
       </button>
 
       {/* Sidebar */}
@@ -53,7 +53,7 @@ const Layout = ({ children }) => {
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={() => setMobileSidebarOpen(false)}
-            className="fixed inset-0 bg-black/50 z-40 lg:hidden"
+            className="fixed inset-0 bg-slate-900/50 z-40 lg:hidden"
           />
         )}
       </AnimatePresence>
